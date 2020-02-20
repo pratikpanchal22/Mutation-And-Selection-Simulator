@@ -1,16 +1,32 @@
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class MeThinksItIsLikeAWeasel {
     public static void main(String[] args) {
-        String target;
-        int stableStrandSize = 7;
-
-        if (args.length == 0) {
-            System.out.println("No target string provided. Using default.");
-            target = "ME THINKS IT IS LIKE A WEASEL";
-        } else {
-            target = args[0];
+        Properties prop = new Properties();
+        String fileName = "app.config";
+        InputStream is = null;
+        try {
+            is = new FileInputStream(fileName);
+        } catch (FileNotFoundException ex) {
         }
+        try {
+            prop.load(is);
+        }
+        catch (IOException ex) {
+        }
+        System.out.println(prop.getProperty("app.name"));
+        System.out.println(prop.getProperty("app.version"));
+        //System.out.println(prop.getProperty("config.target"));
+
+        String target = prop.getProperty("config.target");
+        int stableStrandSize = Integer.valueOf(prop.getProperty("config.stableStrandSize"));
+        int printEveryNthGeneration = Integer.valueOf(prop.getProperty("config.printEveryNthGeneration"));
+
         System.out.println("Target: " + target + ". Length: " + target.length()); // Display the string.
 
         Organism parent = new Organism(target.length());
@@ -36,15 +52,22 @@ public class MeThinksItIsLikeAWeasel {
                 }
             }
             //System.out.println();
-            System.out.println("Generation: " + generation++ + ": Choosing child " + candidate.getOrganismValue()
-                    + " | dIdx:" + candidate.getDeviationIndexWrtTarget(target)
-                    + " | Vulnerable genes:" + candidate.getMutableIndices(target,stableStrandSize).size()
-            );
-
+            if(generation % printEveryNthGeneration == 0) {
+                System.out.println("Generation: " + generation + ": Choosing child: " + candidate.getOrganismValue()
+                        + " | dIdx:" + candidate.getDeviationIndexWrtTarget(target)
+                        + " | Vulnerable genes:" + candidate.getMutableIndices(target, stableStrandSize).size()
+                );
+            }
+            generation++;
             //System.out.println("Mutability indices: " + candidate.getMutableIndices(target, 2).toString());
             parent = candidate;
 
         } while (parent.getDeviationIndexWrtTarget(target) != 0);
+
+        System.out.println("Generation: " + generation + ":     Last child: " + parent.getOrganismValue()
+                + " | dIdx:" + parent.getDeviationIndexWrtTarget(target)
+                + " | Vulnerable genes:" + parent.getMutableIndices(target, stableStrandSize).size()
+        );
     }
 }
 
