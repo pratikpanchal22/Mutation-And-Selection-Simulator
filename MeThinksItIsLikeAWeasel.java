@@ -91,7 +91,6 @@ class Organism{
             match++;
          }
       }
-     
       return (match*100)/target.length();
    }
 }
