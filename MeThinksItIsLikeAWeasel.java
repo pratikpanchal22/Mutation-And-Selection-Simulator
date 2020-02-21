@@ -36,22 +36,27 @@ public class MeThinksItIsLikeAWeasel {
         Organism[] child;
         child = new Organism[numberOfChildrenPerGeneration];
         long generation = 0;
+        ArrayList<Integer> devIndicesArrayList = new ArrayList<Integer>();
         do {
+            // Create children
             for (int i = 0; i < child.length; i++) {
                 //child[i] = new Organism(parent.createChildSeed());
                 child[i] = new Organism(parent.createChildSeedFromMutabilityIndices(parent.getMutableIndices(target, stableStrandSize)));
             }
 
+            // Find the fittest child
             int cHealth = child[0].getDeviationIndexWrtTarget(target);
             Organism candidate = child[0];
-
             for (int i = 0; i < child.length; i++) {
                 //System.out.print("   Child/DI: " + child[i].getOrganismValue() + "/" + child[i].getDeviationIndexWrtTarget(target));
-                if (cHealth >= child[i].getDeviationIndexWrtTarget(target)) {
+                int candidateDevIdx = child[i].getDeviationIndexWrtTarget(target);
+                //devIndicesArrayList.add(candidateDevIdx);
+                if (cHealth >= candidateDevIdx) {
                     cHealth = child[i].getDeviationIndexWrtTarget(target);
                     candidate = child[i];
                 }
             }
+            devIndicesArrayList.add(cHealth);
             //System.out.println();
             if(generation % printEveryNthGeneration == 0) {
                 System.out.println("Generation: " + generation + ": Choosing child: " + candidate.getOrganismValue()
@@ -69,6 +74,9 @@ public class MeThinksItIsLikeAWeasel {
                 + " | dIdx:" + parent.getDeviationIndexWrtTarget(target)
                 + " | Vulnerable genes:" + parent.getMutableIndices(target, stableStrandSize).size()
         );
+
+        //DeviaitonIndicesArrayList
+        System.out.println("DeviationIndicesArrayList: " + devIndicesArrayList.toString());
     }
 }
 
