@@ -56,7 +56,7 @@ public class MeThinksItIsLikeAWeasel {
             if(generation % printEveryNthGeneration == 0) {
                 System.out.println("Generation: " + generation + ": Choosing child: " + candidate.getOrganismValue()
                         + " | dIdx:" + candidate.getDeviationIndexWrtTarget(target)
-                        + " | Vulnerable genes:" + candidate.getMutableIndices(target, stableStrandSize).size()
+                        + " | Vulnerable genes:" + candidate.getMutableIndices(target, stableStrandSize).size() + "/" + target.length()
                 );
             }
             generation++;
