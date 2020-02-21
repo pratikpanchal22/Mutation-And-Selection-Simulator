@@ -26,6 +26,7 @@ public class MeThinksItIsLikeAWeasel {
         String target = prop.getProperty("config.target");
         int stableStrandSize = Integer.valueOf(prop.getProperty("config.stableStrandSize"));
         int printEveryNthGeneration = Integer.valueOf(prop.getProperty("config.printEveryNthGeneration"));
+        int numberOfChildrenPerGeneration = Integer.valueOf(prop.getProperty("config.numberOfChildrenPerGeneration"));
 
         System.out.println("Target: " + target + ". Length: " + target.length()); // Display the string.
 
@@ -33,7 +34,7 @@ public class MeThinksItIsLikeAWeasel {
         System.out.println("Parent:" + parent.getOrganismValue() + " | Deviation Idx:" + parent.getDeviationIndexWrtTarget(target) + " | Median dIdx:" + parent.getDeviationIndexWrtTarget(target)/26);
 
         Organism[] child;
-        child = new Organism[5];
+        child = new Organism[numberOfChildrenPerGeneration];
         long generation = 0;
         do {
             for (int i = 0; i < child.length; i++) {
@@ -44,8 +45,8 @@ public class MeThinksItIsLikeAWeasel {
             int cHealth = child[0].getDeviationIndexWrtTarget(target);
             Organism candidate = child[0];
 
-            for (int i = 0; i < 5; i++) {
-                //System.out.print(" Child/DI: " + child[i].getOrganismValue() + "/" + child[i].getDeviationIndexWrtTarget(target));
+            for (int i = 0; i < child.length; i++) {
+                //System.out.print("   Child/DI: " + child[i].getOrganismValue() + "/" + child[i].getDeviationIndexWrtTarget(target));
                 if (cHealth >= child[i].getDeviationIndexWrtTarget(target)) {
                     cHealth = child[i].getDeviationIndexWrtTarget(target);
                     candidate = child[i];
