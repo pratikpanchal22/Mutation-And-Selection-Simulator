@@ -59,6 +59,8 @@ public class MeThinksItIsLikeAWeasel {
         ArrayList<Integer> devIndicesArrayList = new ArrayList<Integer>();
         devIndicesArrayList.add(parent.getDeviationIndexWrtTarget(target));
         do {
+
+            generation++;
             // Create children
             for (int i = 0; i < child.length; i++) {
                 //child[i] = new Organism(parent.createChildSeed());
@@ -85,7 +87,6 @@ public class MeThinksItIsLikeAWeasel {
                         + " | Vulnerable genes:" + candidate.getMutableIndices(target, stableStrandSize).size() + "/" + target.length()
                 );
             }
-            generation++;
             //System.out.println("Mutability indices: " + candidate.getMutableIndices(target, 2).toString());
             parent = candidate;
 
