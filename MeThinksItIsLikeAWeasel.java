@@ -27,6 +27,7 @@ public class MeThinksItIsLikeAWeasel {
         int stableStrandSize = Integer.valueOf(prop.getProperty("config.stableStrandSize"));
         int printEveryNthGeneration = Integer.valueOf(prop.getProperty("config.printEveryNthGeneration"));
         int numberOfChildrenPerGeneration = Integer.valueOf(prop.getProperty("config.numberOfChildrenPerGeneration"));
+        float stableStrandMutationProbability = Float.valueOf(prop.getProperty("config.stableStrandMutationProbability"));
 
 
         //Configure firstParent
@@ -64,7 +65,7 @@ public class MeThinksItIsLikeAWeasel {
             // Create children
             for (int i = 0; i < child.length; i++) {
                 //child[i] = new Organism(parent.createChildSeed());
-                child[i] = new Organism(parent.createChildSeedFromMutabilityIndices(parent.getMutableIndices(target, stableStrandSize)));
+                child[i] = new Organism(parent.createChildSeedFromMutabilityIndices(parent.getMutableIndices(target, stableStrandSize), stableStrandMutationProbability));
             }
 
             // Find the fittest child
@@ -209,6 +210,40 @@ class Organism {
         int mutationPoint = (int)(Math.random() *  mutabilityIndices.size());
         int childSeedMember = (int) (Math.random()*(122-32+1))+32;
         childSeedArray[mutabilityIndices.get(mutationPoint)] = (char)childSeedMember;
+        return new String(childSeedArray);
+    }
+
+    public String createChildSeedFromMutabilityIndices(ArrayList<Integer> mutableIndices, double stableStrandMutationProbability){
+
+        if(mutableIndices.size() == this.value.length()){
+            //all indices are mutable
+            return createChildSeedFromMutabilityIndices(mutableIndices);
+        }
+
+        //char[] stableStrandIndices = new char[this.value.toCharArray().length - mutableIndices.size()];
+        ArrayList<Integer> stableStrandIndices = new ArrayList<Integer>();
+
+        for(int i=0; i<this.value.length(); i++){
+            if(!mutableIndices.contains(i)){
+                stableStrandIndices.add(i);
+            }
+        }
+
+        float probability = (float) Math.random()*100;
+        if(probability > stableStrandMutationProbability*100){
+            // select from mutableIndices
+            return createChildSeedFromMutabilityIndices(mutableIndices);
+        }
+
+        // select from stableStrandIndices
+        char[] childSeedArray = this.value.toCharArray();
+        System.out.println("child seed: " + new String(childSeedArray));
+        int mutationPoint = (int)(Math.random() *  stableStrandIndices.size());
+        int childSeedMember = (int) (Math.random()*(122-32+1))+32;
+        childSeedArray[stableStrandIndices.get(mutationPoint)] = (char)childSeedMember;
+        System.out.println("Mutable: " + mutableIndices.toString() + "  Stable: " + stableStrandIndices.toString());
+        System.out.println("  >>p="+ probability+" Mutation occurred in stable strand @ index: " + stableStrandIndices.get(mutationPoint) + ". Resultant child: " + new String(childSeedArray));
+
         return new String(childSeedArray);
     }
 }
