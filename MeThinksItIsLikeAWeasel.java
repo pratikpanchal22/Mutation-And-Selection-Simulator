@@ -27,39 +27,67 @@ public class MeThinksItIsLikeAWeasel {
         int stableStrandSize = Integer.valueOf(prop.getProperty("config.stableStrandSize"));
         int printEveryNthGeneration = Integer.valueOf(prop.getProperty("config.printEveryNthGeneration"));
         int numberOfChildrenPerGeneration = Integer.valueOf(prop.getProperty("config.numberOfChildrenPerGeneration"));
+        float stableStrandMutationProbability = Float.valueOf(prop.getProperty("config.stableStrandMutationProbability"));
+
+
+        //Configure firstParent
+        //String firstParent;
+        Organism parent;
+        if(prop.getProperty("config.firstParent") == null){
+            //Random parent
+            parent = new Organism(target.length());
+        }
+        else {
+            String firstParent = prop.getProperty("config.firstParent");
+            if(firstParent.length() == target.length()){
+                System.out.println("lengths are equal");
+                parent = new Organism(firstParent);
+            }
+            else {
+                System.out.println("lengths are NOT equal");
+                parent = new Organism(target.length());
+            }
+        }
 
         System.out.println("Target: " + target + ". Length: " + target.length()); // Display the string.
 
-        Organism parent = new Organism(target.length());
+        //Organism parent = new Organism(target.length());
         System.out.println("Parent:" + parent.getOrganismValue() + " | Deviation Idx:" + parent.getDeviationIndexWrtTarget(target) + " | Median dIdx:" + parent.getDeviationIndexWrtTarget(target)/26);
 
         Organism[] child;
         child = new Organism[numberOfChildrenPerGeneration];
         long generation = 0;
+        ArrayList<Integer> devIndicesArrayList = new ArrayList<Integer>();
+        devIndicesArrayList.add(parent.getDeviationIndexWrtTarget(target));
         do {
+
+            generation++;
+            // Create children
             for (int i = 0; i < child.length; i++) {
                 //child[i] = new Organism(parent.createChildSeed());
-                child[i] = new Organism(parent.createChildSeedFromMutabilityIndices(parent.getMutableIndices(target, stableStrandSize)));
+                child[i] = new Organism(parent.createChildSeedFromMutabilityIndices(parent.getMutableIndices(target, stableStrandSize), stableStrandMutationProbability));
             }
 
+            // Find the fittest child
             int cHealth = child[0].getDeviationIndexWrtTarget(target);
             Organism candidate = child[0];
-
             for (int i = 0; i < child.length; i++) {
                 //System.out.print("   Child/DI: " + child[i].getOrganismValue() + "/" + child[i].getDeviationIndexWrtTarget(target));
-                if (cHealth >= child[i].getDeviationIndexWrtTarget(target)) {
+                int candidateDevIdx = child[i].getDeviationIndexWrtTarget(target);
+                //devIndicesArrayList.add(candidateDevIdx);
+                if (cHealth >= candidateDevIdx) {
                     cHealth = child[i].getDeviationIndexWrtTarget(target);
                     candidate = child[i];
                 }
             }
+            devIndicesArrayList.add(cHealth);
             //System.out.println();
             if(generation % printEveryNthGeneration == 0) {
                 System.out.println("Generation: " + generation + ": Choosing child: " + candidate.getOrganismValue()
                         + " | dIdx:" + candidate.getDeviationIndexWrtTarget(target)
-                        + " | Vulnerable genes:" + candidate.getMutableIndices(target, stableStrandSize).size()
+                        + " | Vulnerable genes:" + candidate.getMutableIndices(target, stableStrandSize).size() + "/" + target.length()
                 );
             }
-            generation++;
             //System.out.println("Mutability indices: " + candidate.getMutableIndices(target, 2).toString());
             parent = candidate;
 
@@ -69,14 +97,25 @@ public class MeThinksItIsLikeAWeasel {
                 + " | dIdx:" + parent.getDeviationIndexWrtTarget(target)
                 + " | Vulnerable genes:" + parent.getMutableIndices(target, stableStrandSize).size()
         );
+
+        //DeviaitonIndicesArrayList
+        System.out.println("DeviationIndicesArrayList: " + devIndicesArrayList.toString());
     }
 }
 
 class Organism {
-    String value;
+    private String value;
+    private char[] organismCharArray;
+
+    private String target;
+    private char[] targetCharArray;
+
+    private int devIdxWrtTarget;
 
     public Organism(String str) {
         this.value = str;
+        this.organismCharArray = this.value.toCharArray();
+        this.devIdxWrtTarget = -1;
     }
 
     public Organism(int size) {
@@ -86,10 +125,16 @@ class Organism {
             charArray[i] = (char) seed;
         }
         this.value = new String(charArray);
+        this.organismCharArray = this.value.toCharArray();
+        this.devIdxWrtTarget = -1;
     }
 
     public String getOrganismValue() {
         return this.value;
+    }
+
+    public char[] getOrganismCharArray(){
+        return this.organismCharArray;
     }
 
     public String createChildSeed() {
@@ -100,40 +145,27 @@ class Organism {
         return new String(childSeedArray);
     }
 
-    public String createChildSeedFromMutabilityIndices(ArrayList<Integer> mutabilityIndices){
-        char[] childSeedArray = this.value.toCharArray();
-
-        int mutationPoint = (int)(Math.random() *  mutabilityIndices.size());
-        int childSeedMember = (int) (Math.random()*(122-32+1))+32;
-        childSeedArray[mutabilityIndices.get(mutationPoint)] = (char)childSeedMember;
-        return new String(childSeedArray);
-    }
-
     public int getDeviationIndexWrtTarget(String target) {
-        char[] targetArray = target.toCharArray();
-        char[] organismArray = this.value.toCharArray();
-        //int match=0;
 
-        int deviationIndex = 0;
-        for (int i = 0; i < targetArray.length; i++) {
-         /*if(targetArray[i] == organismArray[i]){
-            match++;
-         }*/
-            deviationIndex += Math.abs(targetArray[i] - organismArray[i]);
+        if(!target.equals(this.target)){
+            //System.out.println(" $$$$$ getDeviationIndexWrtTarget: " + this.value);
+            this.target = target;
+            this.targetCharArray = target.toCharArray();
+            int deviationIndex = 0;
+            for (int i = 0; i < this.targetCharArray.length; i++) {
+                deviationIndex += Math.abs(this.targetCharArray[i] - this.organismCharArray[i]);
+            }
+            this.devIdxWrtTarget = deviationIndex;
         }
-
-        //return (match*100)/target.length();
-        return deviationIndex;
+        return this.devIdxWrtTarget;
     }
 
     public ArrayList<Integer> getMutableIndices(String target, int groupImmutablityThreshold){
-        char[] targetArray = target.toCharArray();
-        char[] organismArray = this.value.toCharArray();
 
         //construct Match array
         boolean[] matchArray = new boolean[target.length()];
-        for(int i=0; i<targetArray.length; i++){
-            matchArray[i] = targetArray[i] == organismArray[i];
+        for(int i=0; i<this.targetCharArray.length; i++){
+            matchArray[i] = (this.targetCharArray[i] == this.organismCharArray[i]);
         }
 
         //construct Group immutability count array
@@ -169,8 +201,50 @@ class Organism {
                 mutableIndices.add(i);
             }
         }
-
         return mutableIndices;
+    }
+
+    public String createChildSeedFromMutabilityIndices(ArrayList<Integer> mutabilityIndices){
+        char[] childSeedArray = this.value.toCharArray();
+
+        int mutationPoint = (int)(Math.random() *  mutabilityIndices.size());
+        int childSeedMember = (int) (Math.random()*(122-32+1))+32;
+        childSeedArray[mutabilityIndices.get(mutationPoint)] = (char)childSeedMember;
+        return new String(childSeedArray);
+    }
+
+    public String createChildSeedFromMutabilityIndices(ArrayList<Integer> mutableIndices, double stableStrandMutationProbability){
+
+        if(mutableIndices.size() == this.value.length()){
+            //all indices are mutable
+            return createChildSeedFromMutabilityIndices(mutableIndices);
+        }
+
+        //char[] stableStrandIndices = new char[this.value.toCharArray().length - mutableIndices.size()];
+        ArrayList<Integer> stableStrandIndices = new ArrayList<Integer>();
+
+        for(int i=0; i<this.value.length(); i++){
+            if(!mutableIndices.contains(i)){
+                stableStrandIndices.add(i);
+            }
+        }
+
+        float probability = (float) Math.random()*100;
+        if(probability > stableStrandMutationProbability*100){
+            // select from mutableIndices
+            return createChildSeedFromMutabilityIndices(mutableIndices);
+        }
+
+        // select from stableStrandIndices
+        char[] childSeedArray = this.value.toCharArray();
+        System.out.println("child seed: " + new String(childSeedArray));
+        int mutationPoint = (int)(Math.random() *  stableStrandIndices.size());
+        int childSeedMember = (int) (Math.random()*(122-32+1))+32;
+        childSeedArray[stableStrandIndices.get(mutationPoint)] = (char)childSeedMember;
+        System.out.println("Mutable: " + mutableIndices.toString() + "  Stable: " + stableStrandIndices.toString());
+        System.out.println("  >>p="+ probability+" Mutation occurred in stable strand @ index: " + stableStrandIndices.get(mutationPoint) + ". Resultant child: " + new String(childSeedArray));
+
+        return new String(childSeedArray);
     }
 }
 
