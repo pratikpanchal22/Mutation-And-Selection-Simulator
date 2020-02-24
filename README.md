@@ -1,9 +1,9 @@
 ## Random mutation & fitness-based selection simulator
 
-Java command line app to simulate random mutation and non-random fittest selection. This is based on the string mutation that Richard Dawkin discusses in The Blind Watchmaker (chapter 3). This application introduces further complexity by introducing the following controlability:
-1. Space: Control the evolutionary space gap between initial parent and last child
+Java command line app to simulate random mutation and non-random fitness-based selection. This is based on the string mutation that Richard Dawkin discusses in The Blind Watchmaker (chapter 3). This application introduces further complexity to the algorithm by allowing the following controlability:
+1. Evolution space: Control the evolutionary space gap between initial parent and last child (target)
 2. Mutation stability: Stabilize mutation when the group reaches a stable size by controlling the mutation probability.
-3. Range controlled mutation: Limit mutation to occur within configurable constrained range.
+3. Range-constrained mutation: Limit mutation to occur within configurable constrained range for the mutable unit.
 4. Generational fitness: Control generational fitness by varying the number of children per generation.
 
 **Usage:**
