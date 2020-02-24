@@ -1,4 +1,4 @@
-## MutationAndSelectionSimulator
+## Random mutation & fitness-based selection simulator
 
 Java command line app to simulate random mutation and non-random fittest selection. This is based on the string mutation that Richard Dawkin discusses in The Blind Watchmaker (chapter 3). This application introduces further complexity by introducing the following controlability:
 1. Space: Control the evolutionary space gap between initial parent and last child
