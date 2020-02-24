@@ -28,6 +28,10 @@ public class MeThinksItIsLikeAWeasel {
         int printEveryNthGeneration = Integer.valueOf(prop.getProperty("config.printEveryNthGeneration"));
         int numberOfChildrenPerGeneration = Integer.valueOf(prop.getProperty("config.numberOfChildrenPerGeneration"));
         float stableStrandMutationProbability = Float.valueOf(prop.getProperty("config.stableStrandMutationProbability"));
+        boolean doRangeControlledMutation = Boolean.valueOf(prop.getProperty("config.doRangeControlledMutation"));
+        int mutationRange = Integer.valueOf(prop.getProperty("config.mutationRange"));
+        System.out.println("doRangeControlledMutation: " + doRangeControlledMutation + "  Range: mutationRange");
+
 
 
         //Configure firstParent
@@ -54,18 +58,27 @@ public class MeThinksItIsLikeAWeasel {
         //Organism parent = new Organism(target.length());
         System.out.println("Parent:" + parent.getOrganismValue() + " | Deviation Idx:" + parent.getDeviationIndexWrtTarget(target) + " | Median dIdx:" + parent.getDeviationIndexWrtTarget(target)/26);
 
+        //
+
         Organism[] child;
         child = new Organism[numberOfChildrenPerGeneration];
         long generation = 0;
         ArrayList<Integer> devIndicesArrayList = new ArrayList<Integer>();
         devIndicesArrayList.add(parent.getDeviationIndexWrtTarget(target));
+
+        ArrayList<Integer> xArrayList = new ArrayList<Integer>();
+        ArrayList<Integer> yArrayList = new ArrayList<Integer>();
+        ArrayList<Integer> zArrayList = new ArrayList<Integer>();
+        xArrayList.add((int)parent.getOrganismCharArray()[0]);
+        yArrayList.add((int)parent.getOrganismCharArray()[1]);
+        zArrayList.add((int)parent.getOrganismCharArray()[2]);
         do {
 
             generation++;
             // Create children
             for (int i = 0; i < child.length; i++) {
                 //child[i] = new Organism(parent.createChildSeed());
-                child[i] = new Organism(parent.createChildSeedFromMutabilityIndices(parent.getMutableIndices(target, stableStrandSize), stableStrandMutationProbability));
+                child[i] = new Organism(parent.createChildSeedFromMutabilityIndices(parent.getMutableIndices(target, stableStrandSize), stableStrandMutationProbability, doRangeControlledMutation, 5));
             }
 
             // Find the fittest child
@@ -87,9 +100,20 @@ public class MeThinksItIsLikeAWeasel {
                         + " | dIdx:" + candidate.getDeviationIndexWrtTarget(target)
                         + " | Vulnerable genes:" + candidate.getMutableIndices(target, stableStrandSize).size() + "/" + target.length()
                 );
+
             }
             //System.out.println("Mutability indices: " + candidate.getMutableIndices(target, 2).toString());
+
             parent = candidate;
+
+            //Exploration
+            int mRange = 5;
+            char mutatedUnit = parent.getUnitAfterPerformingControlledMutation(parent.getOrganismCharArray()[0], mRange);
+            //System.out.println("Exploration: Original Unit: " + parent.getOrganismCharArray()[0] + " Mutated Unit:" + mutatedUnit +" Mutation Range: " + mRange);
+
+            xArrayList.add((int)parent.getOrganismCharArray()[0]);
+            yArrayList.add((int)parent.getOrganismCharArray()[1]);
+            zArrayList.add((int)parent.getOrganismCharArray()[2]);
 
         } while (parent.getDeviationIndexWrtTarget(target) != 0);
 
@@ -100,6 +124,11 @@ public class MeThinksItIsLikeAWeasel {
 
         //DeviaitonIndicesArrayList
         System.out.println("DeviationIndicesArrayList: " + devIndicesArrayList.toString());
+
+        //All parents
+        System.out.println("x= " + xArrayList.toString());
+        System.out.println("y= " + yArrayList.toString());
+        System.out.println("z= " + zArrayList.toString());
     }
 }
 
@@ -204,20 +233,28 @@ class Organism {
         return mutableIndices;
     }
 
-    public String createChildSeedFromMutabilityIndices(ArrayList<Integer> mutabilityIndices){
+    public String createChildSeedFromMutabilityIndices(ArrayList<Integer> mutabilityIndices, boolean doRangeControlledMutation, int mutationRange){
         char[] childSeedArray = this.value.toCharArray();
 
         int mutationPoint = (int)(Math.random() *  mutabilityIndices.size());
-        int childSeedMember = (int) (Math.random()*(122-32+1))+32;
-        childSeedArray[mutabilityIndices.get(mutationPoint)] = (char)childSeedMember;
+
+        char childSeedMember;
+        if(doRangeControlledMutation){
+            childSeedMember = getUnitAfterPerformingControlledMutation(childSeedArray[mutabilityIndices.get(mutationPoint)], mutationRange);
+        }
+        else {
+            childSeedMember = (char)((int)(Math.random()*(122-32+1))+32);
+        }
+        childSeedArray[mutabilityIndices.get(mutationPoint)] = childSeedMember;
+
         return new String(childSeedArray);
     }
 
-    public String createChildSeedFromMutabilityIndices(ArrayList<Integer> mutableIndices, double stableStrandMutationProbability){
+    public String createChildSeedFromMutabilityIndices(ArrayList<Integer> mutableIndices, double stableStrandMutationProbability,  boolean doRangeControlledMutation, int mutationRange){
 
         if(mutableIndices.size() == this.value.length()){
             //all indices are mutable
-            return createChildSeedFromMutabilityIndices(mutableIndices);
+            return createChildSeedFromMutabilityIndices(mutableIndices, doRangeControlledMutation, mutationRange);
         }
 
         //char[] stableStrandIndices = new char[this.value.toCharArray().length - mutableIndices.size()];
@@ -232,19 +269,58 @@ class Organism {
         float probability = (float) Math.random()*100;
         if(probability > stableStrandMutationProbability*100){
             // select from mutableIndices
-            return createChildSeedFromMutabilityIndices(mutableIndices);
+            return createChildSeedFromMutabilityIndices(mutableIndices, doRangeControlledMutation, mutationRange);
         }
 
         // select from stableStrandIndices
         char[] childSeedArray = this.value.toCharArray();
         System.out.println("child seed: " + new String(childSeedArray));
         int mutationPoint = (int)(Math.random() *  stableStrandIndices.size());
-        int childSeedMember = (int) (Math.random()*(122-32+1))+32;
-        childSeedArray[stableStrandIndices.get(mutationPoint)] = (char)childSeedMember;
+
+        char childSeedMember;
+        if(doRangeControlledMutation){
+            childSeedMember = getUnitAfterPerformingControlledMutation(childSeedArray[stableStrandIndices.get(mutationPoint)], mutationRange);
+        }
+        else {
+            childSeedMember = (char)((int)(Math.random()*(122-32+1))+32);
+        }
+        childSeedArray[stableStrandIndices.get(mutationPoint)] = childSeedMember;
         System.out.println("Mutable: " + mutableIndices.toString() + "  Stable: " + stableStrandIndices.toString());
         System.out.println("  >>p="+ probability+" Mutation occurred in stable strand @ index: " + stableStrandIndices.get(mutationPoint) + ". Resultant child: " + new String(childSeedArray));
 
         return new String(childSeedArray);
+    }
+
+    char getUnitAfterPerformingControlledMutation(char originalUnit, int mutationRange){
+        char mutatedUnit=originalUnit;
+
+        int absLowerBound = 32;
+        int absUpperBound = 122;
+
+        if(mutationRange <= 0){
+            System.out.println("Error! Mutation range must be a positive integer. Provided:" + mutationRange);
+            return mutatedUnit;
+        }
+
+        int rangeLowerBound = (int)originalUnit - mutationRange;
+        int rangeUpperBound = (int)originalUnit + mutationRange;
+
+        if(rangeLowerBound < absLowerBound){
+            rangeUpperBound += Math.abs(absLowerBound-rangeLowerBound);
+            rangeLowerBound = absLowerBound;
+        }
+
+        if(rangeUpperBound > absUpperBound){
+            rangeLowerBound -= Math.abs(rangeUpperBound-absUpperBound);
+            rangeUpperBound = absUpperBound;
+        }
+
+        do{
+            mutatedUnit = (char) ((int)(Math.random()*(rangeUpperBound-rangeLowerBound+1))+rangeLowerBound);
+        }while(mutatedUnit == originalUnit);
+
+
+        return mutatedUnit;
     }
 }
 
