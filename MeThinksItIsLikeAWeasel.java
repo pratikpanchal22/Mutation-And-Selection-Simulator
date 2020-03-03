@@ -4,9 +4,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 
 public class MeThinksItIsLikeAWeasel {
+
+    public static final String PLOT_TEXT_ANCESTORAL_FIRST_PARENT = "Ancestoral First Parent";
+    public static final String PLOT_TEXT_MODERN_LAST_OFFSPRING = "Target offspring";
+    public static final String PLOT_TEXT_STABLE_STRAND_SIZE_S = "Stable strand size, s";
+    public static final String PLOT_TEXT_P_SSM = "p(ssm)";
+    public static final String PLOT_TEXT_RANGE_CONTROLLED_MUTATION = "Range controlled mutation";
+    public static final String PLOT_TEXT_MUTATION_RANGE = "Mutation range";
+    public static final String PLOT_TEXT_N_CHILDREN_GENERATION = "n(children/generation)";
+
     public static void main(String[] args) {
         Properties prop = new Properties();
         String fileName = "app.config";
@@ -133,24 +143,26 @@ public class MeThinksItIsLikeAWeasel {
         System.out.println("y= " + yArrayList.toString());
         System.out.println("z= " + zArrayList.toString());
 
+
+        // Plot data
         HashMap<String, ArrayList<Integer>> plotData = new HashMap<String, ArrayList<Integer>>();
         plotData.put("x", xArrayList);
         plotData.put("y", yArrayList);
         plotData.put("z", zArrayList);
 
-
-
         CreateMatPlotLibFile pyFile = new CreateMatPlotLibFile(PlotType.EVOLUTIONARY_SPACE_PLOT, plotData);
 
-        HashMap<Integer, String> plotText = new HashMap<Integer, String>();
-        plotText.put(0, "First parent: " + firstParent);
-        plotText.put(1, "Target offspring: " + target);
-        plotText.put(2, "Stable strand size, s = " + String.valueOf(stableStrandSize));
-        plotText.put(3, "p(ssm) = " + String.valueOf(stableStrandMutationProbability));
-        plotText.put(4, "Range controlled mutation: " + (String)(doRangeControlledMutation ? "Enabled" : "Disabled"));
-        plotText.put(5, "Mutation range = " + String.valueOf(mutationRange));
-        plotText.put(6, "n(children/generation) = " + String.valueOf(numberOfChildrenPerGeneration));
+        // Plot text - add it in order that needs to be displayed in
+        LinkedHashMap<String, String> plotText = new LinkedHashMap<String, String>();
+        plotText.put(PLOT_TEXT_ANCESTORAL_FIRST_PARENT, firstParent);
+        plotText.put(PLOT_TEXT_MODERN_LAST_OFFSPRING, target);
+        plotText.put(PLOT_TEXT_STABLE_STRAND_SIZE_S, String.valueOf(stableStrandSize));
+        plotText.put(PLOT_TEXT_P_SSM, String.valueOf(stableStrandMutationProbability));
+        plotText.put(PLOT_TEXT_RANGE_CONTROLLED_MUTATION, (String)(doRangeControlledMutation ? "Enabled" : "Disabled"));
+        plotText.put(PLOT_TEXT_MUTATION_RANGE, String.valueOf(mutationRange));
+        plotText.put(PLOT_TEXT_N_CHILDREN_GENERATION, String.valueOf(numberOfChildrenPerGeneration));
         pyFile.setPlotText(plotText);
+
 
         pyFile.createNewMatPlotLibFile();
     }

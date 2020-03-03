@@ -4,10 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 enum PlotType{
     DEVIDX_VS_GENERATION_PLOT,
@@ -19,13 +16,13 @@ public class CreateMatPlotLibFile {
 
     private PlotType plotType;
     private HashMap<String, ArrayList<Integer>> plotData;
-    private HashMap<Integer, String> plotText;
+    private LinkedHashMap<String, String> plotText;
 
-    public HashMap<Integer, String> getPlotText() {
+    public LinkedHashMap<String, String> getPlotText() {
         return plotText;
     }
 
-    public void setPlotText(HashMap<Integer, String> plotText) {
+    public void setPlotText(LinkedHashMap<String, String> plotText) {
         this.plotText = plotText;
     }
 
@@ -129,7 +126,7 @@ public class CreateMatPlotLibFile {
                     StandardOpenOption.APPEND);
 
             // Using for-each loop
-            /*for (Map.Entry mapElement : this.plotText.entrySet()) {
+            for (Map.Entry mapElement : this.plotText.entrySet()) {
                 String key = (String) mapElement.getKey();
                 String value = (String) mapElement.getValue();
 
@@ -138,13 +135,14 @@ public class CreateMatPlotLibFile {
                 vPos -= vPosOffset;
                 Files.write(Paths.get(path), ("ax.text2D("+hPos+", "+vPos+", \" > "+key+" = "+value+"\", transform=ax.transAxes)\n").getBytes(),
                         StandardOpenOption.APPEND);
-            }*/
+            }
+            /*
             for(int i=0; i<this.plotText.size(); i++){
                 String value = (String)this.plotText.get(i);
                 vPos -= vPosOffset;
                 Files.write(Paths.get(path), ("ax.text2D("+hPos+", "+vPos+", \" > "+value+"\", transform=ax.transAxes)\n").getBytes(),
                         StandardOpenOption.APPEND);
-            }
+            }*/
 
             //Show plot
             Files.write(Paths.get(path), ("plt.show()").getBytes(),
