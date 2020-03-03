@@ -19,13 +19,13 @@ public class CreateMatPlotLibFile {
 
     private PlotType plotType;
     private HashMap<String, ArrayList<Integer>> plotData;
-    private HashMap<String, String> plotText;
+    private HashMap<Integer, String> plotText;
 
-    public HashMap<String, String> getPlotText() {
+    public HashMap<Integer, String> getPlotText() {
         return plotText;
     }
 
-    public void setPlotText(HashMap<String, String> plotText) {
+    public void setPlotText(HashMap<Integer, String> plotText) {
         this.plotText = plotText;
     }
 
@@ -129,7 +129,7 @@ public class CreateMatPlotLibFile {
                     StandardOpenOption.APPEND);
 
             // Using for-each loop
-            for (Map.Entry mapElement : this.plotText.entrySet()) {
+            /*for (Map.Entry mapElement : this.plotText.entrySet()) {
                 String key = (String) mapElement.getKey();
                 String value = (String) mapElement.getValue();
 
@@ -137,6 +137,12 @@ public class CreateMatPlotLibFile {
 
                 vPos -= vPosOffset;
                 Files.write(Paths.get(path), ("ax.text2D("+hPos+", "+vPos+", \" > "+key+" = "+value+"\", transform=ax.transAxes)\n").getBytes(),
+                        StandardOpenOption.APPEND);
+            }*/
+            for(int i=0; i<this.plotText.size(); i++){
+                String value = (String)this.plotText.get(i);
+                vPos -= vPosOffset;
+                Files.write(Paths.get(path), ("ax.text2D("+hPos+", "+vPos+", \" > "+value+"\", transform=ax.transAxes)\n").getBytes(),
                         StandardOpenOption.APPEND);
             }
 

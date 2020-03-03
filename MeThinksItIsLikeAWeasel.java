@@ -74,6 +74,7 @@ public class MeThinksItIsLikeAWeasel {
         xArrayList.add((int)parent.getOrganismCharArray()[0]);
         yArrayList.add((int)parent.getOrganismCharArray()[1]);
         zArrayList.add((int)parent.getOrganismCharArray()[2]);
+
         do {
 
             generation++;
@@ -141,14 +142,14 @@ public class MeThinksItIsLikeAWeasel {
 
         CreateMatPlotLibFile pyFile = new CreateMatPlotLibFile(PlotType.EVOLUTIONARY_SPACE_PLOT, plotData);
 
-        HashMap<String, String> plotText = new HashMap<String, String>();
-        plotText.put("First parent", firstParent);
-        plotText.put("Target offspring", target);
-        plotText.put("Stable strand size, s", String.valueOf(stableStrandSize));
-        plotText.put("p(ssm)", String.valueOf(stableStrandMutationProbability));
-        plotText.put("Range controlled mutation", doRangeControlledMutation ? "Enabled" : "Disabled");
-        plotText.put("Mutation range", String.valueOf(mutationRange));
-        plotText.put("n(children/generation)", String.valueOf(numberOfChildrenPerGeneration));
+        HashMap<Integer, String> plotText = new HashMap<Integer, String>();
+        plotText.put(0, "First parent: " + firstParent);
+        plotText.put(1, "Target offspring: " + target);
+        plotText.put(2, "Stable strand size, s = " + String.valueOf(stableStrandSize));
+        plotText.put(3, "p(ssm) = " + String.valueOf(stableStrandMutationProbability));
+        plotText.put(4, "Range controlled mutation: " + (String)(doRangeControlledMutation ? "Enabled" : "Disabled"));
+        plotText.put(5, "Mutation range = " + String.valueOf(mutationRange));
+        plotText.put(6, "n(children/generation) = " + String.valueOf(numberOfChildrenPerGeneration));
         pyFile.setPlotText(plotText);
 
         pyFile.createNewMatPlotLibFile();
