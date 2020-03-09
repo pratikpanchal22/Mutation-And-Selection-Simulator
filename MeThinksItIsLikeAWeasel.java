@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class MeThinksItIsLikeAWeasel {
 
-    public static final String PLOT_TEXT_ANCESTORAL_FIRST_PARENT = "Ancestoral First Parent";
+    public static final String PLOT_TEXT_ANCESTRAL_FIRST_PARENT = "Ancestral First Parent";
     public static final String PLOT_TEXT_MODERN_LAST_OFFSPRING = "Target offspring";
     public static final String PLOT_TEXT_STABLE_STRAND_SIZE_S = "Stable strand size, s";
     public static final String PLOT_TEXT_P_SSM = "p(ssm)";
@@ -17,44 +17,57 @@ public class MeThinksItIsLikeAWeasel {
     public static final String PLOT_TEXT_MUTATION_RANGE = "Mutation range";
     public static final String PLOT_TEXT_N_CHILDREN_GENERATION = "n(children/generation)";
 
+    //Configuration file
+    public static final String CONFIGURATION_FILE_APP_CONFIG = "app.config";
+    public static final String CONFIGURATION_APP_NAME = "app.name";
+    public static final String CONFIGURATION_APP_VERSION = "app.version";
+    public static final String CONFIGURATION_SIM_CONFIG_TARGET = "sim.config.target";
+    public static final String CONFIGURATION_SIM_CONFIG_STABLE_STRAND_SIZE = "sim.config.stableStrandSize";
+    public static final String CONFIGURATION_SIM_CONFIG_PRINT_EVERY_NTH_GENERATION = "sim.config.printEveryNthGeneration";
+    public static final String CONFIGURATION_SIM_CONFIG_NUMBER_OF_CHILDREN_PER_GENERATION = "sim.config.numberOfChildrenPerGeneration";
+    public static final String CONFIGURATION_SIM_CONFIG_STABLE_STRAND_MUTATION_PROBABILITY = "sim.config.stableStrandMutationProbability";
+    public static final String CONFIGURATION_SIM_CONFIG_DO_RANGE_CONTROLLED_MUTATION = "sim.config.doRangeControlledMutation";
+    public static final String CONFIGURATION_SIM_CONFIG_MUTATION_RANGE = "sim.config.mutationRange";
+    public static final String CONFIGURATION_SIM_CONFIG_FIRST_PARENT = "sim.config.firstParent";
+    public static final String CONFIGURATION_PLOT_CONFIG_GENERATE_PLOT = "plot.config.generatePlot";
+
     public static void main(String[] args) {
         Properties prop = new Properties();
-        String fileName = "app.config";
+        String fileName = CONFIGURATION_FILE_APP_CONFIG;
         InputStream is = null;
         try {
             is = new FileInputStream(fileName);
         } catch (FileNotFoundException ex) {
+            System.out.println(ex);
         }
         try {
             prop.load(is);
         }
         catch (IOException ex) {
         }
-        System.out.println(prop.getProperty("app.name"));
-        System.out.println(prop.getProperty("app.version"));
+        System.out.println(prop.getProperty(CONFIGURATION_APP_NAME));
+        System.out.println(prop.getProperty(CONFIGURATION_APP_VERSION));
         //System.out.println(prop.getProperty("config.target"));
 
-        String target = prop.getProperty("config.target");
-        int stableStrandSize = Integer.valueOf(prop.getProperty("config.stableStrandSize"));
-        int printEveryNthGeneration = Integer.valueOf(prop.getProperty("config.printEveryNthGeneration"));
-        int numberOfChildrenPerGeneration = Integer.valueOf(prop.getProperty("config.numberOfChildrenPerGeneration"));
-        float stableStrandMutationProbability = Float.valueOf(prop.getProperty("config.stableStrandMutationProbability"));
-        boolean doRangeControlledMutation = Boolean.valueOf(prop.getProperty("config.doRangeControlledMutation"));
-        int mutationRange = Integer.valueOf(prop.getProperty("config.mutationRange"));
+        String target = prop.getProperty(CONFIGURATION_SIM_CONFIG_TARGET);
+        int stableStrandSize = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_STABLE_STRAND_SIZE));
+        int printEveryNthGeneration = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_PRINT_EVERY_NTH_GENERATION));
+        int numberOfChildrenPerGeneration = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_NUMBER_OF_CHILDREN_PER_GENERATION));
+        float stableStrandMutationProbability = Float.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_STABLE_STRAND_MUTATION_PROBABILITY));
+        boolean doRangeControlledMutation = Boolean.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_DO_RANGE_CONTROLLED_MUTATION));
+        int mutationRange = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_MUTATION_RANGE));
         System.out.println("doRangeControlledMutation: " + doRangeControlledMutation + "  Range: mutationRange");
-
-
 
         //Configure firstParent
         String firstParent;
         Organism parent;
-        if(prop.getProperty("config.firstParent") == null){
+        if(prop.getProperty(CONFIGURATION_SIM_CONFIG_FIRST_PARENT) == null){
             //Random parent
             parent = new Organism(target.length());
             firstParent = parent.getOrganismValue();
         }
         else {
-            firstParent = prop.getProperty("config.firstParent");
+            firstParent = prop.getProperty(CONFIGURATION_SIM_CONFIG_FIRST_PARENT);
             if(firstParent.length() == target.length()){
                 System.out.println("lengths are equal");
                 parent = new Organism(firstParent);
@@ -144,6 +157,11 @@ public class MeThinksItIsLikeAWeasel {
         System.out.println("z= " + zArrayList.toString());
 
 
+        if(prop.getProperty(CONFIGURATION_PLOT_CONFIG_GENERATE_PLOT) == null || !Boolean.valueOf(prop.getProperty(CONFIGURATION_PLOT_CONFIG_GENERATE_PLOT))){
+            System.out.println("generatePlot = false");
+            return;
+        }
+
         // Plot data
         HashMap<String, ArrayList<Integer>> plotData = new HashMap<String, ArrayList<Integer>>();
         plotData.put("x", xArrayList);
@@ -154,7 +172,7 @@ public class MeThinksItIsLikeAWeasel {
 
         // Plot text - add it in order that needs to be displayed in
         LinkedHashMap<String, String> plotText = new LinkedHashMap<String, String>();
-        plotText.put(PLOT_TEXT_ANCESTORAL_FIRST_PARENT, firstParent);
+        plotText.put(PLOT_TEXT_ANCESTRAL_FIRST_PARENT, firstParent);
         plotText.put(PLOT_TEXT_MODERN_LAST_OFFSPRING, target);
         plotText.put(PLOT_TEXT_STABLE_STRAND_SIZE_S, String.valueOf(stableStrandSize));
         plotText.put(PLOT_TEXT_P_SSM, String.valueOf(stableStrandMutationProbability));
@@ -162,7 +180,6 @@ public class MeThinksItIsLikeAWeasel {
         plotText.put(PLOT_TEXT_MUTATION_RANGE, String.valueOf(mutationRange));
         plotText.put(PLOT_TEXT_N_CHILDREN_GENERATION, String.valueOf(numberOfChildrenPerGeneration));
         pyFile.setPlotText(plotText);
-
 
         pyFile.createNewMatPlotLibFile();
     }

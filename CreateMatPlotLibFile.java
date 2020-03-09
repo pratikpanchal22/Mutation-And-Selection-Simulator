@@ -14,6 +14,9 @@ enum PlotType{
 
 public class CreateMatPlotLibFile {
 
+    public static final String DIRECTORY_SIM_PLOTS = "SimPlots";
+    public static final String FILE_NAME_PREFIX_SIM_PLOT = "simPlot";
+
     private PlotType plotType;
     private HashMap<String, ArrayList<Integer>> plotData;
     private LinkedHashMap<String, String> plotText;
@@ -43,12 +46,12 @@ public class CreateMatPlotLibFile {
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String fileSeparator = System.getProperty("file.separator");
-        String directory = "SimPlots";
+        String directory = DIRECTORY_SIM_PLOTS;
         File directoryFile = new File(directory);
         if (! directoryFile.exists()){
             directoryFile.mkdir();
         }
-        String path = directory+fileSeparator+"simPlot-"+timestamp.getTime()+".py";
+        String path = directory+fileSeparator+ FILE_NAME_PREFIX_SIM_PLOT + "-" +timestamp.getTime()+".py";
 
         // Create file
         try{
