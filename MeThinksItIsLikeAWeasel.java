@@ -30,6 +30,7 @@ public class MeThinksItIsLikeAWeasel {
     public static final String CONFIGURATION_SIM_CONFIG_MUTATION_RANGE = "sim.config.mutationRange";
     public static final String CONFIGURATION_SIM_CONFIG_FIRST_PARENT = "sim.config.firstParent";
     public static final String CONFIGURATION_PLOT_CONFIG_GENERATE_PLOT = "plot.config.generatePlot";
+    public static final String CONFIGURATION_PLOT_CONFIG_ADD_SIMULATION_PARAMETERS = "plot.config.addSimulationParameters";
 
     public static void main(String[] args) {
         Properties prop = new Properties();
@@ -45,18 +46,46 @@ public class MeThinksItIsLikeAWeasel {
         }
         catch (IOException ex) {
         }
+
+        //Validation of properties file
+        if(prop.getProperty(CONFIGURATION_APP_NAME) == null ||
+                prop.getProperty(CONFIGURATION_APP_VERSION) == null){
+            System.out.println("Error: App name & version not found");
+            return;
+        }
         System.out.println(prop.getProperty(CONFIGURATION_APP_NAME));
         System.out.println(prop.getProperty(CONFIGURATION_APP_VERSION));
-        //System.out.println(prop.getProperty("config.target"));
 
+        //Target
+        if(prop.getProperty(CONFIGURATION_SIM_CONFIG_TARGET) == null){
+            System.out.println("Error: Target not configured");
+            return;
+        }
         String target = prop.getProperty(CONFIGURATION_SIM_CONFIG_TARGET);
-        int stableStrandSize = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_STABLE_STRAND_SIZE));
-        int printEveryNthGeneration = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_PRINT_EVERY_NTH_GENERATION));
-        int numberOfChildrenPerGeneration = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_NUMBER_OF_CHILDREN_PER_GENERATION));
+
+        // Stable strand size
+        int stableStrandSize;
+        if(prop.getProperty(CONFIGURATION_SIM_CONFIG_STABLE_STRAND_SIZE) == null ||
+                prop.getProperty(CONFIGURATION_SIM_CONFIG_STABLE_STRAND_SIZE) == ""){
+            stableStrandSize = target.length();
+            System.out.println("Warning! Stable strand size not configured. Using default value:"+stableStrandSize);
+        } else{
+            stableStrandSize = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_STABLE_STRAND_SIZE));
+        }
+
+        // Number of offsprings per generation
+        int numberOfChildrenPerGeneration = 20;
+        if(prop.getProperty(CONFIGURATION_SIM_CONFIG_NUMBER_OF_CHILDREN_PER_GENERATION) == null ||
+                Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_NUMBER_OF_CHILDREN_PER_GENERATION)) == 0){
+            System.out.println("Warning: Configuration 'number of offsprings per generation not configured. Using default value:"+numberOfChildrenPerGeneration);
+        }
+        numberOfChildrenPerGeneration = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_NUMBER_OF_CHILDREN_PER_GENERATION));
+
         float stableStrandMutationProbability = Float.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_STABLE_STRAND_MUTATION_PROBABILITY));
         boolean doRangeControlledMutation = Boolean.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_DO_RANGE_CONTROLLED_MUTATION));
         int mutationRange = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_MUTATION_RANGE));
         System.out.println("doRangeControlledMutation: " + doRangeControlledMutation + "  Range: mutationRange");
+        int printEveryNthGeneration = Integer.valueOf(prop.getProperty(CONFIGURATION_SIM_CONFIG_PRINT_EVERY_NTH_GENERATION));
 
         //Configure firstParent
         String firstParent;
@@ -157,9 +186,16 @@ public class MeThinksItIsLikeAWeasel {
         System.out.println("z= " + zArrayList.toString());
 
 
-        if(prop.getProperty(CONFIGURATION_PLOT_CONFIG_GENERATE_PLOT) == null || !Boolean.valueOf(prop.getProperty(CONFIGURATION_PLOT_CONFIG_GENERATE_PLOT))){
+        if(prop.getProperty(CONFIGURATION_PLOT_CONFIG_GENERATE_PLOT) == null ||
+                !Boolean.valueOf(prop.getProperty(CONFIGURATION_PLOT_CONFIG_GENERATE_PLOT))){
             System.out.println("generatePlot = false");
             return;
+        }
+
+        Boolean addSimParms=false;
+        if(prop.getProperty(CONFIGURATION_PLOT_CONFIG_ADD_SIMULATION_PARAMETERS) != null &&
+                Boolean.valueOf(prop.getProperty(CONFIGURATION_PLOT_CONFIG_ADD_SIMULATION_PARAMETERS))){
+            addSimParms=true;
         }
 
         // Plot data
@@ -180,6 +216,10 @@ public class MeThinksItIsLikeAWeasel {
         plotText.put(PLOT_TEXT_MUTATION_RANGE, String.valueOf(mutationRange));
         plotText.put(PLOT_TEXT_N_CHILDREN_GENERATION, String.valueOf(numberOfChildrenPerGeneration));
         pyFile.setPlotText(plotText);
+        pyFile.setConfigurationAddSimulationParams(addSimParms);
+
+        pyFile.setFirstParent(firstParent);
+        pyFile.setLastOffspring(target);
 
         pyFile.createNewMatPlotLibFile();
     }

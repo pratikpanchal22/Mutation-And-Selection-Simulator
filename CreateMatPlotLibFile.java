@@ -20,6 +20,18 @@ public class CreateMatPlotLibFile {
     private PlotType plotType;
     private HashMap<String, ArrayList<Integer>> plotData;
     private LinkedHashMap<String, String> plotText;
+    private String firstParent;
+    private String lastOffspring;
+
+    private Boolean configurationAddSimulationParams;
+
+    public Boolean getConfigurationAddSimulationParams() {
+        return configurationAddSimulationParams;
+    }
+
+    public void setConfigurationAddSimulationParams(Boolean configurationAddSimulationParams) {
+        this.configurationAddSimulationParams = configurationAddSimulationParams;
+    }
 
     public LinkedHashMap<String, String> getPlotText() {
         return plotText;
@@ -30,14 +42,17 @@ public class CreateMatPlotLibFile {
     }
 
     public CreateMatPlotLibFile(PlotType plotType){
+        this.setConfigurationAddSimulationParams(false);
         this.plotType = plotType;
     }
 
     public CreateMatPlotLibFile(HashMap<String, ArrayList<Integer>> plotData){
+        this.setConfigurationAddSimulationParams(false);
         this.plotData = plotData;
     }
 
     public CreateMatPlotLibFile(PlotType plotType, HashMap<String, ArrayList<Integer>> plotData){
+        this.setConfigurationAddSimulationParams(false);
         this.plotType = plotType;
         this.plotData = plotData;
     }
@@ -97,23 +112,28 @@ public class CreateMatPlotLibFile {
 
             //Endpopint lables
             plotData.get("x").get(0);
-            Files.write(Paths.get(path), ("ax.text("+plotData.get("x").get(0)+","
-                            +plotData.get("y").get(0)+","
-                            +plotData.get("z").get(0)
-                            +", \"Ancestoral Parent: '"+" "+"' ("
-                            +plotData.get("x").get(0)+","
-                            +plotData.get("y").get(0)+","
-                            +plotData.get("z").get(0)+")\", color='red')\n").getBytes(),
-                    StandardOpenOption.APPEND);
 
-            Files.write(Paths.get(path), ("ax.text("+plotData.get("x").get(plotData.get("x").size()-1)+","
-                            +plotData.get("y").get(plotData.get("y").size()-1)+","
-                            +plotData.get("z").get(plotData.get("z").size()-1)
-                            +", \"Last offspring: '"+" "+"' ("
-                            +plotData.get("x").get(plotData.get("x").size()-1)+","
-                            +plotData.get("y").get(plotData.get("y").size()-1)+","
-                            +plotData.get("z").get(plotData.get("z").size()-1)+")\", color='red')\n").getBytes(),
-                    StandardOpenOption.APPEND);
+            if(this.firstParent != null) {
+                Files.write(Paths.get(path), ("ax.text(" + plotData.get("x").get(0) + ","
+                                + plotData.get("y").get(0) + ","
+                                + plotData.get("z").get(0)
+                                + ", \"Ancestoral Parent: '" + this.firstParent + "' ("
+                                + plotData.get("x").get(0) + ","
+                                + plotData.get("y").get(0) + ","
+                                + plotData.get("z").get(0) + ")\", color='red')\n").getBytes(),
+                        StandardOpenOption.APPEND);
+            }
+
+            if(this.lastOffspring != null) {
+                Files.write(Paths.get(path), ("ax.text(" + plotData.get("x").get(plotData.get("x").size() - 1) + ","
+                                + plotData.get("y").get(plotData.get("y").size() - 1) + ","
+                                + plotData.get("z").get(plotData.get("z").size() - 1)
+                                + ", \"Last offspring: '" + this.lastOffspring + "' ("
+                                + plotData.get("x").get(plotData.get("x").size() - 1) + ","
+                                + plotData.get("y").get(plotData.get("y").size() - 1) + ","
+                                + plotData.get("z").get(plotData.get("z").size() - 1) + ")\", color='red')\n").getBytes(),
+                        StandardOpenOption.APPEND);
+            }
 
             //Axis labels
             Files.write(Paths.get(path), ("ax.set_xlabel('mutation(g[0])')\n" +
@@ -121,31 +141,27 @@ public class CreateMatPlotLibFile {
                     "ax.set_zlabel('mutation(g[2])')\n\n").getBytes(),
                     StandardOpenOption.APPEND);
 
-            //Plot text (2D)
-            double vPos = 1.00;
-            double hPos = 0.00;
-            double vPosOffset = 0.03;
-            Files.write(Paths.get(path), ("ax.text2D("+hPos+", "+vPos+", \"Simulation Parameters: "+path+"\", transform=ax.transAxes)\n").getBytes(),
-                    StandardOpenOption.APPEND);
-
-            // Using for-each loop
-            for (Map.Entry mapElement : this.plotText.entrySet()) {
-                String key = (String) mapElement.getKey();
-                String value = (String) mapElement.getValue();
-
-                System.out.println("Plot text (2D) key:value >>> " + key + " : " + value);
-
-                vPos -= vPosOffset;
-                Files.write(Paths.get(path), ("ax.text2D("+hPos+", "+vPos+", \" > "+key+" = "+value+"\", transform=ax.transAxes)\n").getBytes(),
+            if(this.configurationAddSimulationParams){
+                //Plot text (2D)
+                double vPos = 1.00;
+                double hPos = 0.00;
+                double vPosOffset = 0.03;
+                Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \"Simulation Parameters: " + path + "\", transform=ax.transAxes)\n").getBytes(),
                         StandardOpenOption.APPEND);
+
+                // Using for-each loop
+                for (Map.Entry mapElement : this.plotText.entrySet()) {
+                    String key = (String) mapElement.getKey();
+                    String value = (String) mapElement.getValue();
+
+                    System.out.println("Plot text (2D) key:value >>> " + key + " : " + value);
+
+                    vPos -= vPosOffset;
+                    Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \" > " + key + " = " + value + "\", transform=ax.transAxes)\n").getBytes(),
+                            StandardOpenOption.APPEND);
+                }
             }
-            /*
-            for(int i=0; i<this.plotText.size(); i++){
-                String value = (String)this.plotText.get(i);
-                vPos -= vPosOffset;
-                Files.write(Paths.get(path), ("ax.text2D("+hPos+", "+vPos+", \" > "+value+"\", transform=ax.transAxes)\n").getBytes(),
-                        StandardOpenOption.APPEND);
-            }*/
+
 
             //Show plot
             Files.write(Paths.get(path), ("plt.show()").getBytes(),
@@ -157,5 +173,21 @@ public class CreateMatPlotLibFile {
             System.out.println("Error! Unable to write data in " + path);
             e.printStackTrace();
         }
+    }
+
+    public String getLastOffspring() {
+        return lastOffspring;
+    }
+
+    public void setLastOffspring(String lastOffspring) {
+        this.lastOffspring = lastOffspring;
+    }
+
+    public String getFirstParent() {
+        return firstParent;
+    }
+
+    public void setFirstParent(String firstParent) {
+        this.firstParent = firstParent;
     }
 }
