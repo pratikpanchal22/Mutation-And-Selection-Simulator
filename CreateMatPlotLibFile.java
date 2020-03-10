@@ -3,10 +3,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
 
-enum PlotType{
+enum PlotType {
     DEVIDX_VS_GENERATION_PLOT,
     EVOLUTIONARY_SPACE_2D_PLOT,
     EVOLUTIONARY_SPACE_PLOT,
@@ -16,14 +17,24 @@ public class CreateMatPlotLibFile {
 
     public static final String DIRECTORY_SIM_PLOTS = "SimPlots";
     public static final String FILE_NAME_PREFIX_SIM_PLOT = "simPlot";
+    public static final String FILE_NAME_PREFIX_SIM_DEVIDX_GEN_PLOT = "simPlotDevIdxVsGeneration";
 
     private PlotType plotType;
     private HashMap<String, ArrayList<Integer>> plotData;
+    private ArrayList<Integer> plotDataDevIdxVsGeneration;
     private LinkedHashMap<String, String> plotText;
     private String firstParent;
     private String lastOffspring;
 
     private Boolean configurationAddSimulationParams;
+
+    public ArrayList<Integer> getPlotDataDevIdxVsGeneration() {
+        return plotDataDevIdxVsGeneration;
+    }
+
+    public void setPlotDataDevIdxVsGeneration(ArrayList<Integer> plotDataDevIdxVsGeneration) {
+        this.plotDataDevIdxVsGeneration = plotDataDevIdxVsGeneration;
+    }
 
     public Boolean getConfigurationAddSimulationParams() {
         return configurationAddSimulationParams;
@@ -41,41 +52,148 @@ public class CreateMatPlotLibFile {
         this.plotText = plotText;
     }
 
-    public CreateMatPlotLibFile(PlotType plotType){
+    public CreateMatPlotLibFile(PlotType plotType) {
         this.setConfigurationAddSimulationParams(false);
         this.plotType = plotType;
     }
 
-    public CreateMatPlotLibFile(HashMap<String, ArrayList<Integer>> plotData){
+    public CreateMatPlotLibFile(HashMap<String, ArrayList<Integer>> plotData) {
         this.setConfigurationAddSimulationParams(false);
         this.plotData = plotData;
     }
 
-    public CreateMatPlotLibFile(PlotType plotType, HashMap<String, ArrayList<Integer>> plotData){
+    public CreateMatPlotLibFile(PlotType plotType, HashMap<String, ArrayList<Integer>> plotData) {
         this.setConfigurationAddSimulationParams(false);
         this.plotType = plotType;
         this.plotData = plotData;
     }
 
-    public void createNewMatPlotLibFile(){
+    public void createNewMatPlotLibFile(ArrayList<PlotType> plotTypes) {
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String fileSeparator = System.getProperty("file.separator");
         String directory = DIRECTORY_SIM_PLOTS;
         File directoryFile = new File(directory);
-        if (! directoryFile.exists()){
+        if (!directoryFile.exists()) {
             directoryFile.mkdir();
         }
-        String path = directory+fileSeparator+ FILE_NAME_PREFIX_SIM_PLOT + "-" +timestamp.getTime()+".py";
 
+        if (plotTypes.contains(PlotType.EVOLUTIONARY_SPACE_PLOT)) {
+            generateEvolutionarySpacePlot(directory + fileSeparator + FILE_NAME_PREFIX_SIM_PLOT + "-" + timestamp.getTime() + ".py");
+        }
+
+        if (plotTypes.contains(PlotType.DEVIDX_VS_GENERATION_PLOT)) {
+            generateDevIdxVsGenerationPlot(directory + fileSeparator + FILE_NAME_PREFIX_SIM_DEVIDX_GEN_PLOT + "-" + timestamp.getTime() + ".py");
+        }
+    }
+
+    private void generateDevIdxVsGenerationPlot(String path) {
         // Create file
-        try{
+        try {
             File file = new File(path);
-            if(file.createNewFile()){
+            if (file.createNewFile()) {
                 System.out.println("File created: " + file.getName());
                 //Files.write(Paths.get(path), String.valueOf(timestamp.getTime()).getBytes());
+            } else {
+                System.out.println("File already exists");
             }
-            else {
+        } catch (IOException e) {
+            System.out.println("Error! Unable to initialize file. ");
+            e.printStackTrace();
+        }
+
+        // Write data to file
+        try {
+            //Files.write(Paths.get(path), String.valueOf(timestamp.getTime()).getBytes());
+            //Initial
+            Files.write(Paths.get(path), ("import matplotlib.pyplot as plt\n").getBytes(),
+                    StandardOpenOption.APPEND);
+
+            //Data
+            Files.write(Paths.get(path), ("plt.plot(" + this.plotDataDevIdxVsGeneration.toString() + ")\n").getBytes(),
+                    StandardOpenOption.APPEND);
+
+            //Axis lables
+            Files.write(Paths.get(path), ("plt.ylabel('Deviation Index')\n" +
+                            "plt.xlabel('Generation')\n\n").getBytes(),
+                    StandardOpenOption.APPEND);
+
+            //y=0 orange horizontal line
+            Files.write(Paths.get(path), ("plt.axhline(0, color='orange', lw=0.75)\n").getBytes(),
+                    StandardOpenOption.APPEND);
+
+
+            //Endpopint lables
+            plotData.get("x").get(0);
+
+            /*
+            if (this.firstParent != null) {
+                Files.write(Paths.get(path), ("ax.text(" + plotData.get("x").get(0) + ","
+                                + plotData.get("y").get(0) + ","
+                                + plotData.get("z").get(0)
+                                + ", \"Ancestoral Parent: '" + this.firstParent + "' ("
+                                + plotData.get("x").get(0) + ","
+                                + plotData.get("y").get(0) + ","
+                                + plotData.get("z").get(0) + ")\", color='red')\n").getBytes(),
+                        StandardOpenOption.APPEND);
+            }
+
+            if (this.lastOffspring != null) {
+                Files.write(Paths.get(path), ("ax.text(" + plotData.get("x").get(plotData.get("x").size() - 1) + ","
+                                + plotData.get("y").get(plotData.get("y").size() - 1) + ","
+                                + plotData.get("z").get(plotData.get("z").size() - 1)
+                                + ", \"Last offspring: '" + this.lastOffspring + "' ("
+                                + plotData.get("x").get(plotData.get("x").size() - 1) + ","
+                                + plotData.get("y").get(plotData.get("y").size() - 1) + ","
+                                + plotData.get("z").get(plotData.get("z").size() - 1) + ")\", color='red')\n").getBytes(),
+                        StandardOpenOption.APPEND);
+            }
+            */
+
+
+/*
+            if (this.configurationAddSimulationParams) {
+                //Plot text (2D)
+                double vPos = 10.00;
+                double hPos = 0.00;
+                double vPosOffset = 0.03;
+                Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \"Simulation Parameters: " + path + "\", transform=ax.transAxes)\n").getBytes(),
+                        StandardOpenOption.APPEND);
+
+                // Using for-each loop
+                for (Map.Entry mapElement : this.plotText.entrySet()) {
+                    String key = (String) mapElement.getKey();
+                    String value = (String) mapElement.getValue();
+
+                    System.out.println("Plot text (2D) key:value >>> " + key + " : " + value);
+
+                    vPos -= vPosOffset;
+                    Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \" > " + key + " = " + value + "\", transform=ax.transAxes)\n").getBytes(),
+                            StandardOpenOption.APPEND);
+                }
+            }
+*/
+
+
+            //Show plot
+            Files.write(Paths.get(path), ("plt.show()").getBytes(),
+                    StandardOpenOption.APPEND);
+
+        } catch (IOException e) {
+            System.out.println("Error! Unable to write data in " + path);
+            e.printStackTrace();
+        }
+    }
+
+    private void generateEvolutionarySpacePlot(String path) {
+
+        // Create file
+        try {
+            File file = new File(path);
+            if (file.createNewFile()) {
+                System.out.println("File created: " + file.getName());
+                //Files.write(Paths.get(path), String.valueOf(timestamp.getTime()).getBytes());
+            } else {
                 System.out.println("File already exists");
             }
         } catch (IOException e) {
@@ -88,12 +206,12 @@ public class CreateMatPlotLibFile {
             //Files.write(Paths.get(path), String.valueOf(timestamp.getTime()).getBytes());
             //Initial
             Files.write(Paths.get(path), ("from mpl_toolkits.mplot3d import Axes3D\n" +
-                    "from matplotlib import cm\n" +
-                    "import matplotlib.pyplot as plt\n" +
-                    "import numpy as np\n" +
-                    "\n" +
-                    "fig = plt.figure()\n" +
-                    "ax = fig.gca(projection='3d')\n").getBytes(),
+                            "from matplotlib import cm\n" +
+                            "import matplotlib.pyplot as plt\n" +
+                            "import numpy as np\n" +
+                            "\n" +
+                            "fig = plt.figure()\n" +
+                            "ax = fig.gca(projection='3d')\n").getBytes(),
                     StandardOpenOption.APPEND);
 
             //Data
@@ -102,18 +220,18 @@ public class CreateMatPlotLibFile {
                 String key = (String) mapElement.getKey();
                 ArrayList<Integer> value = (ArrayList<Integer>) mapElement.getValue();
 
-                Files.write(Paths.get(path), (key+"="+value.toString()+"\n").getBytes(),
+                Files.write(Paths.get(path), (key + "=" + value.toString() + "\n").getBytes(),
                         StandardOpenOption.APPEND);
             }
 
             Files.write(Paths.get(path), ("ax.plot(x, y, z, label='parametric curve')\n" +
-                    "ax.scatter(x,y,z, label='scatter')\n\n").getBytes(),
+                            "ax.scatter(x,y,z, label='scatter')\n\n").getBytes(),
                     StandardOpenOption.APPEND);
 
             //Endpopint lables
             plotData.get("x").get(0);
 
-            if(this.firstParent != null) {
+            if (this.firstParent != null) {
                 Files.write(Paths.get(path), ("ax.text(" + plotData.get("x").get(0) + ","
                                 + plotData.get("y").get(0) + ","
                                 + plotData.get("z").get(0)
@@ -124,7 +242,7 @@ public class CreateMatPlotLibFile {
                         StandardOpenOption.APPEND);
             }
 
-            if(this.lastOffspring != null) {
+            if (this.lastOffspring != null) {
                 Files.write(Paths.get(path), ("ax.text(" + plotData.get("x").get(plotData.get("x").size() - 1) + ","
                                 + plotData.get("y").get(plotData.get("y").size() - 1) + ","
                                 + plotData.get("z").get(plotData.get("z").size() - 1)
@@ -137,11 +255,11 @@ public class CreateMatPlotLibFile {
 
             //Axis labels
             Files.write(Paths.get(path), ("ax.set_xlabel('mutation(g[0])')\n" +
-                    "ax.set_ylabel('mutation(g[1])')\n" +
-                    "ax.set_zlabel('mutation(g[2])')\n\n").getBytes(),
+                            "ax.set_ylabel('mutation(g[1])')\n" +
+                            "ax.set_zlabel('mutation(g[2])')\n\n").getBytes(),
                     StandardOpenOption.APPEND);
 
-            if(this.configurationAddSimulationParams){
+            if (this.configurationAddSimulationParams) {
                 //Plot text (2D)
                 double vPos = 1.00;
                 double hPos = 0.00;
@@ -166,7 +284,6 @@ public class CreateMatPlotLibFile {
             //Show plot
             Files.write(Paths.get(path), ("plt.show()").getBytes(),
                     StandardOpenOption.APPEND);
-
 
 
         } catch (IOException e) {

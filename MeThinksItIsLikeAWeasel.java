@@ -180,6 +180,7 @@ public class MeThinksItIsLikeAWeasel {
         //DeviaitonIndicesArrayList
         System.out.println("DeviationIndicesArrayList: " + devIndicesArrayList.toString());
 
+
         //All parents
         System.out.println("x= " + xArrayList.toString());
         System.out.println("y= " + yArrayList.toString());
@@ -221,6 +222,11 @@ public class MeThinksItIsLikeAWeasel {
         pyFile.setFirstParent(firstParent);
         pyFile.setLastOffspring(target);
 
-        pyFile.createNewMatPlotLibFile();
+        ArrayList<PlotType> plotTypes = new ArrayList<PlotType>();
+        plotTypes.add(PlotType.EVOLUTIONARY_SPACE_PLOT);
+
+        pyFile.setPlotDataDevIdxVsGeneration(devIndicesArrayList);
+        plotTypes.add(PlotType.DEVIDX_VS_GENERATION_PLOT);
+        pyFile.createNewMatPlotLibFile(plotTypes);
     }
 }
