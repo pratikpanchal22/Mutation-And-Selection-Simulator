@@ -16,7 +16,7 @@ enum PlotType {
 public class CreateMatPlotLibFile {
 
     public static final String DIRECTORY_SIM_PLOTS = "SimPlots";
-    public static final String FILE_NAME_PREFIX_SIM_PLOT = "simPlot";
+    public static final String FILE_NAME_PREFIX_SIM_PLOT = "simPlotEvolutionary3DSpace";
     public static final String FILE_NAME_PREFIX_SIM_DEVIDX_GEN_PLOT = "simPlotDevIdxVsGeneration";
 
     private PlotType plotType;
@@ -114,8 +114,8 @@ public class CreateMatPlotLibFile {
                     StandardOpenOption.APPEND);
 
             //Axis lables
-            Files.write(Paths.get(path), ("plt.ylabel('Deviation Index')\n" +
-                            "plt.xlabel('Generation')\n\n").getBytes(),
+            Files.write(Paths.get(path), ("plt.ylabel('Deviation Index',family='Monospace')\n" +
+                            "plt.xlabel('Generation',family='Monospace')\n\n").getBytes(),
                     StandardOpenOption.APPEND);
 
             //y=0 orange horizontal line
@@ -124,11 +124,15 @@ public class CreateMatPlotLibFile {
 
 
             //Endpopint lables
-            plotData.get("x").get(0);
+            //plotData.get("x").get(0);
+
+            //Mark first and last points
+            Files.write(Paths.get(path), ("plt.plot(0," + this.getPlotDataDevIdxVsGeneration().get(0) +",'bo')\n").getBytes(), StandardOpenOption.APPEND);
+            Files.write(Paths.get(path), ("plt.plot("+ (this.getPlotDataDevIdxVsGeneration().size()-1) + ",0,'bo')\n").getBytes(), StandardOpenOption.APPEND);
 
             /*
             if (this.firstParent != null) {
-                Files.write(Paths.get(path), ("ax.text(" + plotData.get("x").get(0) + ","
+                Files.write(Paths.get(path), ("plt.plot(" + plotData.get("x").get(0) + ","
                                 + plotData.get("y").get(0) + ","
                                 + plotData.get("z").get(0)
                                 + ", \"Ancestoral Parent: '" + this.firstParent + "' ("
@@ -147,17 +151,22 @@ public class CreateMatPlotLibFile {
                                 + plotData.get("y").get(plotData.get("y").size() - 1) + ","
                                 + plotData.get("z").get(plotData.get("z").size() - 1) + ")\", color='red')\n").getBytes(),
                         StandardOpenOption.APPEND);
-            }
-            */
+            }*/
 
 
-/*
+
+
             if (this.configurationAddSimulationParams) {
                 //Plot text (2D)
-                double vPos = 10.00;
-                double hPos = 0.00;
-                double vPosOffset = 0.03;
-                Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \"Simulation Parameters: " + path + "\", transform=ax.transAxes)\n").getBytes(),
+                double vPos = this.plotDataDevIdxVsGeneration.get(0); //y: This should be the first value of devIdx
+                //double hPos = this.plotDataDevIdxVsGeneration.size() - 100;  //x: This should be % of width. The width is last generation
+                double hPos = this.plotDataDevIdxVsGeneration.size() *  0.57; //57% of width
+                double vPosOffset = 7;
+                Files.write(Paths.get(path), ("plt.text(" + hPos + ", " + vPos + ", \"Simulation Parameters for " + path + " \",family='Monospace',wrap=True)\n").getBytes(),
+                        StandardOpenOption.APPEND);
+                //PLOT TYPE
+                vPos -= vPosOffset;
+                Files.write(Paths.get(path), ("plt.text(" + hPos + ", " + vPos + ", \"Plot type: DEVIATION INDEX VS GENERATION PLOT"  + "\",family='Monospace',wrap=True)\n").getBytes(),
                         StandardOpenOption.APPEND);
 
                 // Using for-each loop
@@ -168,11 +177,10 @@ public class CreateMatPlotLibFile {
                     System.out.println("Plot text (2D) key:value >>> " + key + " : " + value);
 
                     vPos -= vPosOffset;
-                    Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \" > " + key + " = " + value + "\", transform=ax.transAxes)\n").getBytes(),
+                    Files.write(Paths.get(path), ("plt.text(" + hPos + ", " + vPos + ", \" > " + key + " = " + value + " \",family='Monospace',wrap=True)\n").getBytes(),
                             StandardOpenOption.APPEND);
                 }
             }
-*/
 
 
             //Show plot
@@ -238,7 +246,7 @@ public class CreateMatPlotLibFile {
                                 + ", \"Ancestoral Parent: '" + this.firstParent + "' ("
                                 + plotData.get("x").get(0) + ","
                                 + plotData.get("y").get(0) + ","
-                                + plotData.get("z").get(0) + ")\", color='red')\n").getBytes(),
+                                + plotData.get("z").get(0) + ")\", color='red',family='Monospace')\n").getBytes(),
                         StandardOpenOption.APPEND);
             }
 
@@ -249,14 +257,14 @@ public class CreateMatPlotLibFile {
                                 + ", \"Last offspring: '" + this.lastOffspring + "' ("
                                 + plotData.get("x").get(plotData.get("x").size() - 1) + ","
                                 + plotData.get("y").get(plotData.get("y").size() - 1) + ","
-                                + plotData.get("z").get(plotData.get("z").size() - 1) + ")\", color='red')\n").getBytes(),
+                                + plotData.get("z").get(plotData.get("z").size() - 1) + ")\", color='red',family='Monospace')\n").getBytes(),
                         StandardOpenOption.APPEND);
             }
 
             //Axis labels
-            Files.write(Paths.get(path), ("ax.set_xlabel('mutation(g[0])')\n" +
-                            "ax.set_ylabel('mutation(g[1])')\n" +
-                            "ax.set_zlabel('mutation(g[2])')\n\n").getBytes(),
+            Files.write(Paths.get(path), ("ax.set_xlabel('mutation(g[0])',family='Monospace')\n" +
+                            "ax.set_ylabel('mutation(g[1])',family='Monospace')\n" +
+                            "ax.set_zlabel('mutation(g[2])',family='Monospace')\n\n").getBytes(),
                     StandardOpenOption.APPEND);
 
             if (this.configurationAddSimulationParams) {
@@ -264,7 +272,11 @@ public class CreateMatPlotLibFile {
                 double vPos = 1.00;
                 double hPos = 0.00;
                 double vPosOffset = 0.03;
-                Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \"Simulation Parameters: " + path + "\", transform=ax.transAxes)\n").getBytes(),
+                Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \"Simulation Parameters for " + path + "\", transform=ax.transAxes)\n").getBytes(),
+                        StandardOpenOption.APPEND);
+                //Plot type
+                vPos -= vPosOffset;
+                Files.write(Paths.get(path), ("ax.text2D(" + hPos + ", " + vPos + ", \"Plot type: EVOLUTIONARY 3D SPACE PLOT"  + "\", transform=ax.transAxes)\n").getBytes(),
                         StandardOpenOption.APPEND);
 
                 // Using for-each loop
