@@ -127,33 +127,16 @@ public class CreateMatPlotLibFile {
             //plotData.get("x").get(0);
 
             //Mark first and last points
-            Files.write(Paths.get(path), ("plt.plot(0," + this.getPlotDataDevIdxVsGeneration().get(0) +",'bo')\n").getBytes(), StandardOpenOption.APPEND);
-            Files.write(Paths.get(path), ("plt.plot("+ (this.getPlotDataDevIdxVsGeneration().size()-1) + ",0,'bo')\n").getBytes(), StandardOpenOption.APPEND);
-
-            /*
+            //Label first and last points
             if (this.firstParent != null) {
-                Files.write(Paths.get(path), ("plt.plot(" + plotData.get("x").get(0) + ","
-                                + plotData.get("y").get(0) + ","
-                                + plotData.get("z").get(0)
-                                + ", \"Ancestoral Parent: '" + this.firstParent + "' ("
-                                + plotData.get("x").get(0) + ","
-                                + plotData.get("y").get(0) + ","
-                                + plotData.get("z").get(0) + ")\", color='red')\n").getBytes(),
-                        StandardOpenOption.APPEND);
+                Files.write(Paths.get(path), ("plt.plot(0," + this.getPlotDataDevIdxVsGeneration().get(0) +",'bo')\n").getBytes(), StandardOpenOption.APPEND);
+                Files.write(Paths.get(path), ("plt.text(2," + (this.getPlotDataDevIdxVsGeneration().get(0)+2) +",'g=0 with max devIdx')\n").getBytes(), StandardOpenOption.APPEND);
             }
 
             if (this.lastOffspring != null) {
-                Files.write(Paths.get(path), ("ax.text(" + plotData.get("x").get(plotData.get("x").size() - 1) + ","
-                                + plotData.get("y").get(plotData.get("y").size() - 1) + ","
-                                + plotData.get("z").get(plotData.get("z").size() - 1)
-                                + ", \"Last offspring: '" + this.lastOffspring + "' ("
-                                + plotData.get("x").get(plotData.get("x").size() - 1) + ","
-                                + plotData.get("y").get(plotData.get("y").size() - 1) + ","
-                                + plotData.get("z").get(plotData.get("z").size() - 1) + ")\", color='red')\n").getBytes(),
-                        StandardOpenOption.APPEND);
-            }*/
-
-
+                Files.write(Paths.get(path), ("plt.plot("+ (this.getPlotDataDevIdxVsGeneration().size()-1) + ",0,'bo')\n").getBytes(), StandardOpenOption.APPEND);
+                Files.write(Paths.get(path), ("plt.text(" + (this.getPlotDataDevIdxVsGeneration().size()*0.92) +",-7,'g="+ (this.getPlotDataDevIdxVsGeneration().size()-1) +" with devIdx=0')\n").getBytes(), StandardOpenOption.APPEND);
+            }
 
 
             if (this.configurationAddSimulationParams) {
