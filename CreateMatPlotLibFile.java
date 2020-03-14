@@ -144,7 +144,7 @@ public class CreateMatPlotLibFile {
                 double vPos = this.plotDataDevIdxVsGeneration.get(0); //y: This should be the first value of devIdx
                 //double hPos = this.plotDataDevIdxVsGeneration.size() - 100;  //x: This should be % of width. The width is last generation
                 double hPos = this.plotDataDevIdxVsGeneration.size() *  0.57; //57% of width
-                double vPosOffset = 7;
+                double vPosOffset = (0.03 * vPos);//7;
                 Files.write(Paths.get(path), ("plt.text(" + hPos + ", " + vPos + ", \"Simulation Parameters for " + path + " \",family='Monospace',wrap=True)\n").getBytes(),
                         StandardOpenOption.APPEND);
                 //PLOT TYPE
