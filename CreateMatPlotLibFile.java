@@ -130,12 +130,14 @@ public class CreateMatPlotLibFile {
             //Label first and last points
             if (this.firstParent != null) {
                 Files.write(Paths.get(path), ("plt.plot(0," + this.getPlotDataDevIdxVsGeneration().get(0) +",'bo')\n").getBytes(), StandardOpenOption.APPEND);
-                Files.write(Paths.get(path), ("plt.text(2," + (this.getPlotDataDevIdxVsGeneration().get(0)+2) +",'g=0 with max devIdx')\n").getBytes(), StandardOpenOption.APPEND);
+                double hPos = 0.02 * this.plotDataDevIdxVsGeneration.size();
+                Files.write(Paths.get(path), ("plt.text("+ hPos +"," + (this.getPlotDataDevIdxVsGeneration().get(0)+2) +",'g=0 with max devIdx')\n").getBytes(), StandardOpenOption.APPEND);
             }
 
             if (this.lastOffspring != null) {
                 Files.write(Paths.get(path), ("plt.plot("+ (this.getPlotDataDevIdxVsGeneration().size()-1) + ",0,'bo')\n").getBytes(), StandardOpenOption.APPEND);
-                Files.write(Paths.get(path), ("plt.text(" + (this.getPlotDataDevIdxVsGeneration().size()*0.92) +",-7,'g="+ (this.getPlotDataDevIdxVsGeneration().size()-1) +" with devIdx=0')\n").getBytes(), StandardOpenOption.APPEND);
+                double vPos = -0.025 * this.plotDataDevIdxVsGeneration.get(0);
+                Files.write(Paths.get(path), ("plt.text(" + (this.getPlotDataDevIdxVsGeneration().size()*0.92) +","+vPos+",'g="+ (this.getPlotDataDevIdxVsGeneration().size()-1) +" with devIdx=0')\n").getBytes(), StandardOpenOption.APPEND);
             }
 
 
